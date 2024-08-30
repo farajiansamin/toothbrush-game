@@ -7,7 +7,7 @@ import Modal from "./Modal";
 import * as THREE from "three";
 
 function WebGLComponent() {
-  const TIMER = 30
+  const TIMER = 30 // seconds
   const [timer, setTimer] = useState(TIMER);
   const [gameStarted, setGameStarted] = useState(false);
   const [showInstructions, setShowInstructions] = useState(true);
@@ -308,10 +308,18 @@ function WebGLComponent() {
           disabled={gameStarted}
           style={{
             color: "white",
-            backgroundColor: "transparent",
-            border: "1px solid white",
+            backgroundColor: gameStarted ? "#888" : "#007BFF",
+            border: "none",
+            padding: "10px 20px",
             marginRight: "10px",
+            borderRadius: "5px",
+            cursor: gameStarted ? "not-allowed" : "pointer",
+            boxShadow: "0px 4px 6px rgba(0, 0, 0, 0.1)",
+            transition: "background-color 0.3s ease, transform 0.2s ease",
+            transform: gameStarted ? "none" : "translateY(0)",
           }}
+          onMouseDown={(e) => e.target.style.transform = gameStarted ? "none" : "translateY(2px)"}
+          onMouseUp={(e) => e.target.style.transform = gameStarted ? "none" : "translateY(0)"}
         >
           Start Game
         </button>
@@ -319,9 +327,17 @@ function WebGLComponent() {
           onClick={restartGame}
           style={{
             color: "white",
-            backgroundColor: "transparent",
-            border: "1px solid white",
+            backgroundColor: "#FF5733",
+            border: "none",
+            padding: "10px 20px",
+            borderRadius: "5px",
+            cursor: "pointer",
+            boxShadow: "0px 4px 6px rgba(0, 0, 0, 0.1)",
+            transition: "background-color 0.3s ease, transform 0.2s ease",
+            transform: "translateY(0)",
           }}
+          onMouseDown={(e) => e.target.style.transform = "translateY(2px)"}
+          onMouseUp={(e) => e.target.style.transform = "translateY(0)"}
         >
           Restart Game
         </button>
@@ -338,6 +354,7 @@ function WebGLComponent() {
       <canvas id="webgl-canvas" />
     </>
   );
+  
   
 }
 
