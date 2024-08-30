@@ -1,3 +1,4 @@
+
 // @ts-nocheck
 "use client";
 
@@ -7,7 +8,7 @@ import Modal from "./Modal";
 import * as THREE from "three";
 
 function WebGLComponent() {
-  const TIMER = 30 // seconds
+  const TIMER = 30; // seconds
   const [timer, setTimer] = useState(TIMER);
   const [gameStarted, setGameStarted] = useState(false);
   const [showInstructions, setShowInstructions] = useState(true);
@@ -15,6 +16,8 @@ function WebGLComponent() {
   const [row2Teeth, setRow2Teeth] = useState([]);
   const [showModal, setShowModal] = useState(false);
   const [modalMessage, setModalMessage] = useState("");
+  const [scores, setScores] = useState([]); // State to track last 10 scores
+  const [scoreAdded, setScoreAdded] = useState(false); // State to track if score was added
 
   // Function to generate a random brown color
   const getRandomBrownColor = () => {
@@ -71,10 +74,8 @@ function WebGLComponent() {
     if (gameStarted) {
       interval = setInterval(() => {
         setTimer((prevTimer) => (prevTimer > 0 ? prevTimer - 1 : 0));
+        checkGameResult(); // Check game result periodically
       }, 1000);
-    }
-    if (timer === 0) {
-      checkGameResult();
     }
     return () => clearInterval(interval);
   }, [gameStarted, timer]);
@@ -196,18 +197,15 @@ function WebGLComponent() {
       const intersects = raycaster.intersectObjects(scene.children, true);
 
       if (intersects.length > 0) {
-        // console.log("Intersection detected, changing cursor");
         document.body.style.cursor = 'url("/images/toothbrush-32.png"), auto';
-      
       } else {
-        // console.log("No intersection, resetting cursor");
         document.body.style.cursor = 'auto'; // Reset to default cursor if no intersection
       }
     };
 
     window.addEventListener("mousemove", onMouseMove);
 
-    const onMouseClick = (event: MouseEvent) => {
+    const onMouseClick = (event) => {
       if (!gameStarted) return;
 
       mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
@@ -220,13 +218,7 @@ function WebGLComponent() {
         const intersectedObject = intersect.object as THREE.Mesh;
 
         if (intersectedObject.isTooth) {
-          makeWhite(intersectedObject)
-
-          if (areAllTeethWhite(row1Teeth) && areAllTeethWhite(row2Teeth)) {
-            setGameStarted(false);  
-            setModalMessage("Congratulations, you won! Do you want to restart?");
-            setShowModal(true); // Show the modal with the win message
-          }
+          makeWhite(intersectedObject);
         }
       });
     };
@@ -253,21 +245,34 @@ function WebGLComponent() {
     };
   }, [gameStarted]);
 
+  const updateScores = (newScore) => {
+    setScores((prevScores) => {
+      const updatedScores = [...prevScores, newScore];
+      // Keep only the last 10 scores
+      if (updatedScores.length > 10) {
+        updatedScores.shift();
+      }
+      return updatedScores;
+    });
+  };
+
   const startGame = () => {
     setShowInstructions(false);
     setTimer(TIMER);
     setGameStarted(true);
+    setScoreAdded(false); // Reset scoreAdded when the game starts
   };
 
   const makeWhite = (tooth) => {
     tooth.material.color.set(0xffffff);
-  }
+  };
 
   const restartGame = () => {
     setGameStarted(false);
     resetTeeth();
     setTimer(TIMER);
     setTimeout(() => setGameStarted(true), 100);
+    setScoreAdded(false); // Reset scoreAdded when the game restarts
   };
 
   const handleConfirm = () => {
@@ -279,17 +284,25 @@ function WebGLComponent() {
     setShowModal(false); // Just hide the modal if cancelled
   };
 
-
   const checkGameResult = () => {
     if (areAllTeethWhite(row1Teeth) && areAllTeethWhite(row2Teeth)) {
-      setModalMessage("Congratulations, you won! Do you want to restart?");
-      setShowModal(true); // Show the modal with the win message
+      if (!scoreAdded) {
+        const timerMax = parseFloat(TIMER) || 1;
+        const score = (timer * 100) / timerMax;
+        updateScores(score.toFixed(2)); // Update the scores
+        setModalMessage(`Congratulations, you won! Your score is ${score.toFixed(2)}. Do you want to restart?`);
+        setScoreAdded(true); // Mark the score as added
+        setShowModal(true); // Show the modal with the win message
+      }
     } else if (timer === 0) {
-      setModalMessage("Time's up! You lost. Do you want to restart?");
-      setShowModal(true); // Show the modal with the loss message
+      if (!scoreAdded) {
+        updateScores(0); // Update the scores with a loss (0)
+        setModalMessage("Time's up! You lost. Do you want to restart?");
+        setScoreAdded(true); // Mark the score as added
+        setShowModal(true); // Show the modal with the loss message
+      }
       setGameStarted(false);
     }
-    
   };
 
   return (
@@ -318,8 +331,8 @@ function WebGLComponent() {
             transition: "background-color 0.3s ease, transform 0.2s ease",
             transform: gameStarted ? "none" : "translateY(0)",
           }}
-          onMouseDown={(e) => e.target.style.transform = gameStarted ? "none" : "translateY(2px)"}
-          onMouseUp={(e) => e.target.style.transform = gameStarted ? "none" : "translateY(0)"}
+          onMouseDown={(e) => (e.target.style.transform = gameStarted ? "none" : "translateY(2px)")}
+          onMouseUp={(e) => (e.target.style.transform = gameStarted ? "none" : "translateY(0)")}
         >
           Start Game
         </button>
@@ -337,8 +350,8 @@ function WebGLComponent() {
             transition: "background-color 0.3s ease, transform 0.2s ease",
             transform: "translateY(0)",
           }}
-          onMouseDown={(e) => e.target.style.transform = "translateY(2px)"}
-          onMouseUp={(e) => e.target.style.transform = "translateY(0)"}
+          onMouseDown={(e) => (e.target.style.transform = "translateY(2px)")}
+          onMouseUp={(e) => (e.target.style.transform = "translateY(0)")}
         >
           Restart Game
         </button>
@@ -352,11 +365,40 @@ function WebGLComponent() {
           />
         )}
       </div>
+      <div
+        style={{
+          position: "absolute",
+          top: "100px",
+          left: "20px",
+          zIndex: 1,
+          color: "white",
+        }}
+      >
+        <h3>Last 10 Scores:</h3>
+        <table
+          style={{
+            border: "1px solid white",
+            width: "200px",
+            textAlign: "center",
+          }}
+        >
+          <thead>
+            <tr>
+              <th style={{ borderBottom: "1px solid white" }}>Score</th>
+            </tr>
+          </thead>
+          <tbody>
+            {scores.map((score, index) => (
+              <tr key={index}>
+                <td>{score}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
       <canvas id="webgl-canvas" />
     </>
   );
-  
-  
 }
 
 export default WebGLComponent;

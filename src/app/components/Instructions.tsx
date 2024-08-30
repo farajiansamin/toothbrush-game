@@ -4,8 +4,9 @@ const Instructions = () => {
   return (
     <div
       style={{
-        marginTop: "20px",
+        marginTop: "80px",
         padding: "15px",
+        
         backgroundColor: "rgba(0, 0, 0, 0.5)",
         border: "2px solid white",
         borderRadius: "10px",
