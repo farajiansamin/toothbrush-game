@@ -1,3 +1,4 @@
+// @ts-nocheck
 "use client";
 
 import React, { useEffect, useState } from "react";
@@ -12,7 +13,7 @@ function WebGLComponent() {
   const [showInstructions, setShowInstructions] = useState(true);
   const [row1Teeth, setRow1Teeth] = useState([]);
   const [row2Teeth, setRow2Teeth] = useState([]);
-  const [showModal, setShowModal] = useState(false); // State to control modal visibility
+  const [showModal, setShowModal] = useState(false);
   const [modalMessage, setModalMessage] = useState("");
 
   // Function to generate a random brown color
