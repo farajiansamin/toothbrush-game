@@ -14,6 +14,7 @@ This project includes a WebGL-based interactive game developed using React and T
 - **Dynamic Color Changes:** Teeth change color when clicked, and random brown teeth are generated for each game session.
 - **Modal Dialog:** Displays game results and provides options to restart the game.
 - **Instructions:** The game includes an instructions section to guide players on how to play.
+- **Score Table:** A score table that displays the 10 most recent scores of the player, allowing them to track their performance across multiple game sessions.
 
 ### Components
 
