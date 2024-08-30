@@ -31,3 +31,21 @@ body {
     text-wrap: balance;
   }
 }
+
+canvas {
+  display: block;
+  margin: 0;
+  padding: 0;
+  position: absolute;
+  top: 0;
+  left: 0;
+}
+
+body {
+  cursor: pointer; /* Changes the cursor to a pointer */
+}
+
+/* Custom cursor */
+.custom-cursor {
+  cursor: url('/Toothbrush.png'), auto;
+}
