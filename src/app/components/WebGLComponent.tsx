@@ -325,9 +325,10 @@ function WebGLComponent() {
         </button>
         <button
           onClick={restartGame}
+          disabled={!gameStarted}
           style={{
             color: "white",
-            backgroundColor: "#FF5733",
+            backgroundColor: !gameStarted ? "#888" : "#FF5733",
             border: "none",
             padding: "10px 20px",
             borderRadius: "5px",
